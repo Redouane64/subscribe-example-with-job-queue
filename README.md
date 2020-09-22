@@ -8,6 +8,6 @@ The goal of this express application is to demonstrate job queueing on server. I
 
 # How it works
 
-- Send `POST` request to `http://host:port/subscribe?email=<e-mail-address>
+- Send `POST` request to ```http://host:port/subscribe?email=<e-mail-address>```
 - Server will return immediatly with message `{ message: "You've subscribed successfully."`
 - Subscription jobs queued to `Bull` queue for processing one by one.
