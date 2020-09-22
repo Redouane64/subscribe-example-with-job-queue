@@ -1,6 +1,6 @@
 {
-  "name": "app",
-  "version": "1.0.1",
+  "name": "express-subscribe-mail",
+  "version": "1.0.0",
   "description": "",
   "scripts": {
     "start:dev": "npx ts-node ./src",
