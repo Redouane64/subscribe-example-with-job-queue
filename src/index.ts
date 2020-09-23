@@ -45,8 +45,8 @@ subscribersQ.process(async (job, done) => {
         console.debug(`[BULL] Processed e-mail address: ${email}`)
         done()
     }).catch(error => {
-        console.error(error)
         console.error(`[BULL] Failed to process e-mail address: ${email}`)
+        console.error(error.message)
     })
 
 })
@@ -79,8 +79,8 @@ app.post("/subscribe", async (req, res) => {
 })
 
 // start listening to incoming requests on provided port
-const port = +process.env.PORT! || 3333
-const host = process.env.HOST || "localhost"
+const port = +process.env.PORT!
+const host = process.env.HOST
 
-app.listen(port, host, 
+app.listen(port, host!, 
     () => console.log(`[EXPRESS] listening on ${host}:${port}...`))
