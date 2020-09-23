@@ -22,18 +22,38 @@ const subscribersQ = new Bull("subscribers", {
 // wire listener to queue active event
 subscribersQ.on("active", () => console.debug("[BULL] Q is active."))
 
-// wire processor function for queued messages
-subscribersQ.process(async (job, done) => {
-    const { email } = job.data
+// report job
+const reportingQ = new Bull("reporting", {
+    redis: {
+        host: process.env.REDIS_HOST,
+        port: +process.env.REDIS_PORT!
+    }
+})
+reportingQ.process(async (job, done) => {
+    // TODO: message should be customized with actual number of subscribers.
+    await sendEmail("redouane.sobaihi2@gmail.com", "Subscribers Report", "You have 0 new subscribers.")
+        .then(() => {
+            console.debug("[BULL] Report sent successfully.")
+            done()
+        })
+        .catch((error) => {
+            console.error(`[BULL] Failed to process report job`)
+            console.error(error.message)
+        })
+})
+reportingQ.add({ }, { delay: 300000, repeat: { every: 300000 /* 5 min */ }, priority: 1 })
+
+// Send an email helper
+const sendEmail = (to: string, subject?: string, text?: string) => {
 
     const mailOptions = {
         from: process.env.MAIL_FROM,
-        to: email,
-        subject: process.env.MAIL_SUBJ,
-        text: process.env.MAIL_TEXT,
+        to,
+        subject: subject || process.env.MAIL_SUBJ,
+        text: text || process.env.MAIL_TEXT,
     }
 
-    await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
         transporter.sendMail(mailOptions, (err, info) => {
             if (err) {
                 reject(err)
@@ -41,7 +61,14 @@ subscribersQ.process(async (job, done) => {
                 resolve(info)
             }
         })
-    }).then((value) => {
+    })
+}
+
+// wire processor function for queued messages
+subscribersQ.process(async (job, done) => {
+    const { email } = job.data
+
+    await sendEmail(email).then((value) => {
         console.debug(`[BULL] Processed e-mail address: ${email}`)
         done()
     }).catch(error => {
